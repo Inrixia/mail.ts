@@ -1,6 +1,6 @@
 {
   "name": "@inrixia/mail",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Various helper functions & classes for email",
   "main": "index.js",
   "dependencies": {
