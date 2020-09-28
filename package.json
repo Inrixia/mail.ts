@@ -1,0 +1,24 @@
+{
+  "name": "@inrixia/mail",
+  "version": "1.0.0",
+  "description": "Various helper functions & classes for email",
+  "main": "index.js",
+  "dependencies": {
+    "imap": "^0.8.19",
+    "mailparser": "^3.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Inrixia/mail.js.git"
+  },
+  "author": "Inrix",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Inrixia/mail.js/issues"
+  },
+  "homepage": "https://github.com/Inrixia/mail.js#readme"
+}
