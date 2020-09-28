@@ -2,6 +2,8 @@ const
 Imap = require('imap'),
 MailParser = require('mailparser').MailParser;
 
+const { lObj } = require('@inrixia/helpers/object')
+
 module.exports = class ImapListener extends Imap {
 	/**
 	 * Listens for new emails, emits "mail" and "err" events.
@@ -33,24 +35,35 @@ module.exports = class ImapListener extends Imap {
 			if (err) return this.emit('error', err)
 			
 			if (!seachResults || seachResults.length === 0) return
+				
 	
 			const fetch = this.fetch(seachResults, {
 				markSeen: this._opts.markSeen,
 				bodies: ''
 			});
 			fetch.on('message', msg => {
-				let uid, flags;
-				msg.on('attributes', attrs => {                                                           
-					uid = attrs.uid;
-					flags = attrs.flags;
-				});
+				
+				let mail = { attachments: [] };
+				msg.on('attributes', attrs => mail = attrs);
 
-				let mailParser = new MailParser();
-				mailParser.once('end', mail => {
-					mail.uid = uid;
-					mail.flags = flags;
-					this.emit('email', mail);
-				});
+				const mailParser = new MailParser();
+				mailParser.on('data', data => {
+					if (data.type === 'attachment') {
+						mail.attachments.push(data);
+						data.release();
+					} else mail = { 
+					...mail, 
+					...data 
+					}
+				})
+				mailParser.on('headers', headers => mail = {
+					...mail, 
+					...Array.from(headers).reduce((headers, [key, value]) =>{
+						headers[key] = value
+						return headers
+					}, {})
+				})
+				mailParser.once('end', () => this.emit('email', mail))
 				msg.once('body', stream => stream.pipe(mailParser));
 			});
 			fetch.once('error', err => this.emit('error', err))
