@@ -43,8 +43,9 @@ module.exports = class ImapListener extends Imap {
 			});
 			fetch.on('message', msg => {
 				msg.once('body', stream => {
-					simpleParser(stream, mail => {
-						this.emit('email', mail)
+					simpleParser(stream, (err, mail) => {
+						if (err) this.emit('error', err)
+						else this.emit('email', mail)
 					})
 				})
 			});
