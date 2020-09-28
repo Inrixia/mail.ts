@@ -49,7 +49,7 @@ module.exports = class ImapListener extends Imap {
 				mailParser.once('end', mail => {
 					mail.uid = uid;
 					mail.flags = flags;
-					this.emit('mail', mail);
+					this.emit('email', mail);
 				});
 				msg.once('body', stream => stream.pipe(mailParser));
 			});
