@@ -1,6 +1,7 @@
 const 
 Imap = require('imap'),
 MailParser = require('mailparser').MailParser;
+const simpleParser = require('mailparser').simpleParser;
 
 const { lObj } = require('@inrixia/helpers/object')
 
@@ -36,35 +37,16 @@ module.exports = class ImapListener extends Imap {
 			
 			if (!seachResults || seachResults.length === 0) return
 				
-	
 			const fetch = this.fetch(seachResults, {
 				markSeen: this._opts.markSeen,
 				bodies: ''
 			});
 			fetch.on('message', msg => {
-				
-				let mail = { attachments: [] };
-				msg.on('attributes', attrs => mail = attrs);
-
-				const mailParser = new MailParser();
-				mailParser.on('data', data => {
-					if (data.type === 'attachment') {
-						mail.attachments.push(data);
-						data.release();
-					} else mail = { 
-					...mail, 
-					...data 
-					}
+				msg.once('body', stream => {
+					simpleParser(stream, mail => {
+						this.emit('email', mail)
+					})
 				})
-				mailParser.on('headers', headers => mail = {
-					...mail, 
-					...Array.from(headers).reduce((headers, [key, value]) =>{
-						headers[key] = value
-						return headers
-					}, {})
-				})
-				mailParser.once('end', () => this.emit('email', mail))
-				msg.once('body', stream => stream.pipe(mailParser));
 			});
 			fetch.once('error', err => this.emit('error', err))
 		});
