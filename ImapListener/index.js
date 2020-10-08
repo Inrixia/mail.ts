@@ -15,7 +15,6 @@ module.exports = class ImapListener extends Imap {
 		this.once('ready', () => {
 			this.openBox(this._opts.mailbox||"INBOX", false, err => {
 				if (err) rej(err)
-				this.fetchUnseen()
 				res()
 			})
 		})
