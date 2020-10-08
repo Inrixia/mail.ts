@@ -1,9 +1,6 @@
 const 
 Imap = require('imap'),
-MailParser = require('mailparser').MailParser;
 const simpleParser = require('mailparser').simpleParser;
-
-const { lObj } = require('@inrixia/helpers/object')
 
 module.exports = class ImapListener extends Imap {
 	/**
@@ -13,18 +10,17 @@ module.exports = class ImapListener extends Imap {
 	constructor(options) {
 		super(options)
 		this._opts = options
+		this.on('mail', this.fetchUnseen);
 	}
 	start = () => new Promise((res, rej) => {
 		this.once('ready', () => {
 			this.openBox(this._opts.mailbox||"INBOX", false, err => {
 				if (err) rej(err)
-				this.on('mail', this.fetchUnseen);
 				this.fetchUnseen()
 				res()
 			})
 		})
 		this.connect();
-		
 	})
 	stop = () => new Promise((res, rej) => {
 		this.on('close', res)
