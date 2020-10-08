@@ -1,5 +1,4 @@
-const 
-Imap = require('imap');
+const Imap = require('imap');
 const simpleParser = require('mailparser').simpleParser;
 
 module.exports = class ImapListener extends Imap {
