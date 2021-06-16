@@ -1,5 +1,7 @@
-import Imap, { Config } from "imap";
+import Imap from "imap";
 import { simpleParser } from "mailparser";
+
+import type { Config } from "imap";
 
 type ImapOptions = { 
 	mailbox?: string, 
