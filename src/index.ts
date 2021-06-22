@@ -4,12 +4,13 @@ import { simpleParser } from "mailparser";
 import type { Config } from "imap";
 import type { ParsedMail } from "mailparser";
 
-type ImapOptions = { 
-	mailbox?: string, 
-	markSeen?: boolean 
-}
+type ImapOptions = {
+	mailbox?: string;
+	markSeen?: boolean;
+};
 
 export interface ImapListener extends Imap {
+	on(event: string, listener: Function): this;
 	on(event: "error", listener: (message: Error) => void): this;
 	/**
 	 * Emitted when new mail has been parsed.
@@ -42,19 +43,21 @@ export class ImapListener extends Imap {
 		this.markSeen = options?.markSeen || true;
 		this.on("mail", this.fetchUnseen);
 	}
-	start = () => new Promise<void>((res, rej) => {
-		this.once("ready", () => {
-			this.openBox(this.mailbox, false, err => {
-				if (err) rej(err);
-				else res();
+	start = () =>
+		new Promise<void>((res, rej) => {
+			this.once("ready", () => {
+				this.openBox(this.mailbox, false, (err) => {
+					if (err) rej(err);
+					else res();
+				});
 			});
+			this.connect();
 		});
-		this.connect();
-	});
-	stop = () => new Promise<void>(res => {
-		this.on("close", res);
-		this.end();
-	});
+	stop = () =>
+		new Promise<void>((res) => {
+			this.on("close", res);
+			this.end();
+		});
 
 	fetchUnseen = () => {
 		this.search(["UNSEEN"], (err, seachResults) => {
@@ -66,15 +69,15 @@ export class ImapListener extends Imap {
 				markSeen: this.markSeen,
 				bodies: "",
 			});
-			fetch.on("message", msg => {
-				msg.once("body", stream => {
+			fetch.on("message", (msg) => {
+				msg.once("body", (stream) => {
 					simpleParser(stream, (err, mail) => {
 						if (err) this.emit("error", err);
 						else this.emit("email", mail);
 					});
 				});
 			});
-			fetch.on("error", err => this.emit("error", err));
+			fetch.on("error", (err) => this.emit("error", err));
 		});
 	};
 }
